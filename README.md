@@ -1,4 +1,4 @@
-# Anchor Skeleton ![ci](https://img.shields.io/cirrus/github/dovahcrow/anchor-skeleton?style=flat-square&task=ci)
+# Anchor Skeleton ![ci](https://img.shields.io/github/checks-status/dovahcrow/anchor-skeleton/master?style=flat-square)
 
 My project skeleton for [Anchor](https://github.com/project-serum/anchor) projects.
 
