@@ -1,0 +1,91 @@
+name: ci
+
+on:
+  pull_request:
+    branches:
+      - master
+  push:
+    branches:
+      - master
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    container: ubuntu
+    steps:
+      - name: Install build environment
+        run: |
+          apt-get update
+          apt-get install -y git curl build-essential pkg-config libssl-dev libudev-dev python3-dev
+        env:
+          DEBIAN_FRONTEND: noninteractive
+
+      - uses: actions/checkout@v2
+
+      - uses: actions-rs/toolchain@v1
+        with:
+          toolchain: stable
+          components: rustfmt
+          default: true
+
+      - uses: actions/setup-node@v2
+        with:
+          node-version: "14"
+
+      - uses: actions/cache@v2
+        with:
+          path: |
+            ~/.cargo/bin/
+            ~/.cargo/registry/index/
+            ~/.cargo/registry/cache/
+            ~/.cargo/git/db/
+            target/
+          key: ${{ runner.os }}-cargo-${{ secrets.CACHE_VERSION }}-${{ hashFiles('**/Cargo.lock') }}
+
+      - name: Install tools
+        run: |
+          [ ! -f "$HOME/.cargo/bin/just" ] && curl --proto '=https' --tlsv1.2 -sSf https://just.systems/install.sh | bash -s -- --to ~/.cargo/bin
+          npm i -g @project-serum/anchor-cli
+          sh -c "$(curl -sSfL https://release.solana.com/v1.8.2/install)"
+          echo "$HOME/.cargo/bin:$HOME/.local/share/solana/install/active_release/bin:$PATH" >> $GITHUB_PATH
+
+      - name: cargo fmt
+        uses: actions-rs/cargo@v1
+        with:
+          command: fmt
+          args: --all -- --check -q
+
+      - name: cargo clippy
+        uses: actions-rs/cargo@v1
+        with:
+          command: clippy
+
+      - name: Initialize a solana account
+        run: |
+          solana config set --url https://api.devnet.solana.com
+          mkdir -p ~/.config/solana
+          echo "${{secrets.DEPLOY_KEY}}" > ~/.config/solana/id.json
+
+      - name: Generate keypairs
+        run: |
+          solana-keygen new --no-passphrase -o programs/contract-skeleton/key.json
+
+          echo "Program ID for contract-skeleton: $(solana-keygen pubkey programs/contract-skeleton/key.json)"
+
+      - name: Deploy the program
+        run: |
+          just deploy contract-skeleton
+
+      - name: Run all tests
+        uses: actions-rs/cargo@v1
+        with:
+          command: test
+          args: --features dev
+        env:
+          RUST_LOG: solana_client::rpc_client=debug
+          RUST_BACKTRACE: 1
+          ADMIN_WALLET: ~/.config/solana/id.json
+
+      - name: Close the program to reclaim the rent
+        run: |
+          just dangerously-close contract-skeleton
