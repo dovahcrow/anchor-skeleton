@@ -1,6 +1,6 @@
 # Anchor Skeleton ![ci](https://img.shields.io/github/workflow/status/dovahcrow/anchor-skeleton/ci?style=flat-square)
 
-My project skeleton for [Anchor](https://github.com/project-serum/anchor) projects.
+Battery-included Solana/[Anchor](https://github.com/project-serum/anchor) project skeleton.
 
 ## Features
 * Rust test only: All tests (integration, unit) are written in Rust, so the compiler will also check them. No Typescript based tests.
