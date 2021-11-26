@@ -5,10 +5,10 @@ My project skeleton for [Anchor](https://github.com/project-serum/anchor) projec
 ## Features
 * Rust test only: All tests (integration, unit) are written in Rust so they will also be checked by the compiler. No Typescript based tests.
 * CI integration: CI automatically deploys the project to devnet and run all the tests in Github Action.
-* Feature based Program ID switch: switch program_id based on cargo features: by default the program_id will be the one decalre in `lib.rs` (production program-id).
-  If the `dev` feature is enabled (enabled by default in the Justfile), the program_id will be loaded from `programs/contract-skeleton/key.json` (dev program-id).
+* Feature based Program ID switch: switch the `declare_id` in `lib.rs` based on cargo features: by default the program_id will be the one declared in `lib.rs` (production program-id).
+  If the `dev` cargo feature is enabled (enabled by default in the Justfile), the `declare_id` will be the one loaded from `programs/contract-skeleton/key.json` (dev program-id).
   You can use `just keygen contract-skeleton` to generate a new one.
-* Battery included: the skeleton demonstrates the usage of errors, events, examples and integration tests.
+* Battery included: the skeleton demonstrates the usage of errors, events, examples and integration tests and is immediately deployable and testable.
   
 ## Prerequisites
 
@@ -18,7 +18,7 @@ My project skeleton for [Anchor](https://github.com/project-serum/anchor) projec
 * [Solana](https://docs.solana.com/cli/install-solana-cli-tools#macos--linux)
 * [Anchor](https://project-serum.github.io/anchor/getting-started/installation.html#install-anchor)
 
-For ci:
+For CI:
 * Copy and paste your deployer key (a json array, e.g. the content of `~/.config/solana/id.json`) into the Github Secret `DEPLOY_KEY`.
   There should be some solana inside the deployer's account otherwise CI cannot deploy the project for paying the rent.
   
